@@ -3,4 +3,5 @@
  Implemented in Pytorch.
  
  Pytorch-MSSSIM from https://github.com/jorge-pessoa/pytorch-msssim
+ \n
  Data from the JSRT Chest X-ray dataset (not included)
