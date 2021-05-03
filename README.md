@@ -2,6 +2,6 @@
  Gusarev's bone suppression method, as described in: DOI:10.1109/CIBCB.2017.8058543
  Implemented in Pytorch.
  
- Pytorch-MSSSIM from https://github.com/jorge-pessoa/pytorch-msssim
- \n
- Data from the JSRT Chest X-ray dataset (not included)
+ Pytorch-MSSSIM from https://github.com/jorge-pessoa/pytorch-msssim .
+ 
+ Data from the JSRT Chest X-ray dataset (not included).
