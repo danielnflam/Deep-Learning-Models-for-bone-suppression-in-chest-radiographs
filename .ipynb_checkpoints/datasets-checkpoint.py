@@ -1,3 +1,4 @@
+import torch
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
@@ -11,7 +12,14 @@ from skimage import io, transform
 # Shiraishi J, Katsuragawa S, Ikezoe J, Matsumoto T, Kobayashi T, Komatsu K, Matsui M, Fujita H, Kodera Y, and Doi K.: Development of a digital image database for chest radiographs with and without a lung nodule: Receiver operating characteristic analysis of radiologists’ detection of pulmonary nodules. AJR 174; 71-74, 2000
 ###########################
 class JSRT_CXR(Dataset):
-    def __init__(self, data_normal, data_BSE):
+    def __init__(self, data_normal, data_BSE, transform):
+        """
+        Inputs:
+            data_normal: root directory holding the normal / non-suppressed images
+            data_BSE: root directory holding the bone-suppressed images
+            transform: (optional) a torchvision.transforms.Compose series of transformations
+        Assumed that files corresponding to the same patient have the same name in both folders data_normal and data_BSE.
+        """
         sample = {"Patient": [], "boneless":[], "source":[]}
         for root, dirs, files in os.walk(data_BSE):
             for name in files:
