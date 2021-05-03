@@ -48,13 +48,12 @@ class JSRT_CXR(Dataset):
         if torch.is_tensor(idx):
             idx = idx.tolist() # transform into python list
         
+        patient_code = self.data["Patient"].iloc[idx]
         source_image = plt.imread(self.data["source"].iloc[idx])
         boneless_image = plt.imread(self.data["boneless"].iloc[idx])
         source_image, boneless_image = self._check_if_array_3D(source_image, boneless_image)
         
-        patient_code = self.data["Patient"].iloc[idx]
-        
-        sample = {'source': source_image, 'boneless': boneless_image, 'patientCode': patient_code}
+        sample = {'source': source_image, 'boneless': boneless_image} #'patientCode': patient_code
         
         if self.transform:
             sample = self.transform(sample)

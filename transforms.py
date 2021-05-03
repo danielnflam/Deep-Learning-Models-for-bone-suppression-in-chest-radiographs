@@ -141,7 +141,7 @@ class Rescale(object):
         assert isinstance(output_size, (int, tuple))
         self.output_size = output_size
         self.sample_keys_images = sample_keys_images
-        self.sample_key_PixelSize = sample_key_PixelSize
+        #self.sample_key_PixelSize = sample_key_PixelSize
         
     def __call__(self, sample):
         """
@@ -153,10 +153,10 @@ class Rescale(object):
         """
         for key_idx in self.sample_keys_images:
             image = sample[key_idx]
-            if self.sample_key_PixelSize is not None:
-                PixelSize = sample[self.sample_key_PixelSize]
-            else:
-                PixelSize = None
+            #if self.sample_key_PixelSize is not None:
+            #    PixelSize = sample[self.sample_key_PixelSize]
+            #else:
+            #    PixelSize = None
             
             if len(image.shape) == 2:
                 h, w = image.shape[:2]
@@ -175,11 +175,11 @@ class Rescale(object):
             sample[key_idx] = out
             
             # Output the rescaled PixelSize
-            if PixelSize == None:
-                out_PixelSize = None
-            else:
-                out_PixelSize = (PixelSize[0]*(h/new_h), PixelSize[1]*(w/new_w))
-            sample[self.sample_key_PixelSize] = out_PixelSize
+            #if PixelSize == None:
+            #    out_PixelSize = None
+            #else:
+            #    out_PixelSize = (PixelSize[0]*(h/new_h), PixelSize[1]*(w/new_w))
+            #sample[self.sample_key_PixelSize] = out_PixelSize
         return sample
 
 class RescalingNormalisation(object):
