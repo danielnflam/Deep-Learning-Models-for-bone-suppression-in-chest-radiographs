@@ -35,9 +35,13 @@ class JSRT_CXR(Dataset):
                     # For each patient code, search the alternate data_folder to obtain the corresponding source
                     for root2, dirs2, files2 in os.walk(data_normal):
                         for name2 in files2:
-                            if patient_code_file in name2:
+                            # Need regex to distinguish between e.g. 0_1 and 0_10
+                            filename2,_ = os.path.splitext(name2)
+                            if patient_code_file == filename2:
                                 sample["source"].append(os.path.join(root2, name2))
+
         self.data = pd.DataFrame(sample)
+        
         self.transform = transform
         
     def __len__(self):
