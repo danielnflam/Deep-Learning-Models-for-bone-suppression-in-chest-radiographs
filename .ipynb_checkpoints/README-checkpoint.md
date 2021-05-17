@@ -1,6 +1,6 @@
 # Deep Learning Models for bone suppression in chest radiographs
- Gusarev's bone suppression method, as described in: DOI:10.1109/CIBCB.2017.8058543 .
- Implemented in Pytorch.
+ Gusarev's bone suppression method, as described in https://doi.org/10.1109/CIBCB.2017.8058543
+ The software here has been implemented in Python 3.6 and PyTorch.
  
  # How to run the software:
  1) Go to analysis script
