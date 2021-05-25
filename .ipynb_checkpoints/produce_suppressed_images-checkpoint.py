@@ -1,6 +1,3 @@
-# 2021-05-25
-# Test script based on the analysis_script.ipynb
-
 import numpy as np
 import pandas as pd
 from pathlib import Path
@@ -21,44 +18,42 @@ import datasets, transforms, GusarevModel, pytorch_msssim
 # Flags:
 flag_savePictures = False
 
-# Path to the trained network
+# Paths
 PATH_SAVE_NETWORK_INTERMEDIATE = "./trained_network.tar"
-
-
+key_source = "source" # this is the dictionary key for the original radiograph in the datasets
+key_boneless = "boneless" # this is the dictionary key for the bone-suppressed radiograph in the datasets file
 # Data
-# To run your own data, set up a PyTorch dataset in the datasets.py file
-# The network was trained/tested on the "internal" dataset.
 _batch_size = 10
 image_spatial_size = (440,440)
+
 switch = "external_POLYU" #"internal"##
 
+print("The dataset chosen is: " + switch)
 if switch == "internal":
     directory_source = "D:/data/JSRT/augmented/test/source/"
     directory_boneless = "D:/data/JSRT/augmented/test/target/"
-    keys_images = ["source", "boneless"]
+    keys_images = [key_source, key_boneless]
     ds = datasets.JSRT_CXR(directory_source, directory_boneless, 
                            transform=tvtransforms.Compose([
                                  transforms.RescalingNormalisation(keys_images,(0,1)),
-                                 transforms.RandomIntensityComplement(keys_images, probability=0.5),
                                  transforms.Rescale(image_spatial_size, keys_images, None),
                                  transforms.ToTensor(keys_images),
                                  ]))
 elif switch == "external_POLYU":
     externalTest_directory = "D:/data/POLYU_COVID19_CXR_CT_Cohort1/cxr/CXR_PNG"
-    keys_images = ["source"]
+    keys_images = [key_source]
     ds = datasets.POLYU_COVID19_CXR_CT_Cohort1(externalTest_directory,
                                  transform=tvtransforms.Compose([
                                  transforms.RescalingNormalisation(keys_images,(0,1)),
-                                 transforms.RandomIntensityComplement(keys_images, probability=0.5),
                                  transforms.Rescale(image_spatial_size, keys_images, None),
                                  transforms.ToTensor(keys_images),
                                  ]))
+else:
+    raise RuntimeError("Dataset unknown.  Please input the details in the datasets.py file")
 print(len(ds))
 dl = DataLoader(ds, _batch_size, shuffle=True, num_workers=0)
 
-
-## NETWORK
-# Load network from the trained_network.tar file
+# Network
 input_array_size = (_batch_size, 1, image_spatial_size[0], image_spatial_size[1])
 net = GusarevModel.MultilayerCNN(input_array_size)
 #net = nn.DataParallel(net, list(range(ngpu)))
@@ -74,38 +69,17 @@ else:
     print("=> NO CHECKPOINT FOUND AT '{}'" .format(PATH_SAVE_NETWORK_INTERMEDIATE))
     raise RuntimeError("No checkpoint found at specified path.")
 
+# Set to testing mode
 net.eval()
 
-# Visualisation
-# generate a batch sample from the dataloader
-# saves images in the same directory as the trained network
-sample = next(iter(dl))
-print(sample["source"].shape)
-out = net(sample["source"])
-out = out.detach()
-# Save directory for images
-save_directory = os.path.split(PATH_SAVE_NETWORK_INTERMEDIATE)[0]
-for batch_idx in range(_batch_size):
-    if "boneless" in keys_images:
-        plt.figure(1)
-        fig, ax = plt.subplots(1,3, figsize=(15,5))
-        ax[0].imshow(sample["source"][batch_idx,0,:],cmap='gray')
-        ax[0].set_title("Source")
-        ax[0].axis("off")
-        ax[1].imshow(out[batch_idx,0,:],cmap='gray')
-        ax[1].set_title("Suppressed")
-        ax[1].axis("off")
-        ax[2].imshow(sample["boneless"][batch_idx,0,:],cmap='gray')
-        ax[2].set_title("Ideal")
-        ax[2].axis("off")
-    else:
-        plt.figure(1)
-        fig, ax = plt.subplots(1,2, figsize=(15,5))
-        ax[0].imshow(sample["source"][batch_idx,0,:],cmap='gray')
-        ax[0].set_title("Source")
-        ax[0].axis("off")
-        ax[1].imshow(out[batch_idx,0,:],cmap='gray')
-        ax[1].set_title("Suppressed")
-        ax[1].axis("off")
-    if flag_savePictures:
-        plt.savefig(os.path.join(save_directory, switch + "_comparisonImages_"+ str(batch_idx) +".png"))
+path_to_save_images = Path(os.path.join("bone_suppressed",switch))
+path_to_save_images.mkdir(parents=True, exist_ok=True)
+for ii, data in enumerate(dl):
+    out = net(data[key_source])
+    print(out.shape)
+    print("Batch Number:" + str(ii))
+    for image in out:
+        savename = str(iters)+".png"
+        vutils.save_image( image, os.path.join(path_to_save_images, savename))
+        iters+=1
+    

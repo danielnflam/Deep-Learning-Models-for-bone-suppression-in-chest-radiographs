@@ -41,8 +41,11 @@ class JSRT_CXR(Dataset):
             transform: (optional) a torchvision.transforms.Compose series of transformations
         Assumed that files corresponding to the same patient have the same name in both folders data_normal and data_BSE.
         """
-        sample = {"Patient": [], "boneless":[], "source":[]}
-        for root, dirs, files in os.walk(data_BSE):
+        if data_BSE is not None:
+            sample = {"Patient": [], "boneless":[], "source":[]}
+        else:
+            sample = {"Patient": [], "source":[]}
+        for root, dirs, files in os.walk(data_normal):
             for name in files:
                 if '.png' in name:
                     a_filepath = os.path.join(root, name)
@@ -51,18 +54,18 @@ class JSRT_CXR(Dataset):
                     patient_code_file = os.path.splitext(tail)[0]
                     # Place into lists
                     sample["Patient"].append(patient_code_file)
-                    sample["boneless"].append(a_filepath)
-
+                    sample["source"].append(a_filepath)
+                    
                     # For each patient code, search the alternate data_folder to obtain the corresponding source
-                    for root2, dirs2, files2 in os.walk(data_normal):
-                        for name2 in files2:
-                            # Need regex to distinguish between e.g. 0_1 and 0_10
-                            filename2,_ = os.path.splitext(name2)
-                            if patient_code_file == filename2:
-                                sample["source"].append(os.path.join(root2, name2))
+                    if data_BSE is not None:
+                        for root2, dirs2, files2 in os.walk(data_BSE):
+                            for name2 in files2:
+                                # Need regex to distinguish between e.g. 0_1 and 0_10
+                                filename2,_ = os.path.splitext(name2)
+                                if patient_code_file == filename2:
+                                    sample["boneless"].append(os.path.join(root2, name2))
 
-        self.data = pd.DataFrame(sample)
-        
+        self.data = pd.DataFrame(sample)        
         self.transform = transform
         
     def __len__(self):
