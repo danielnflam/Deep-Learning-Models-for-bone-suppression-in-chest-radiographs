@@ -5,7 +5,9 @@
  
  # How to run the software using the pre-trained model:
  The pre-trained model is in the root directory, called "trained_network.tar".  This tar file is a dictionary containing the model state-dict, optimiser state-dict, and scheduler state-dict, the number of epochs completed and the number of real image-pairs shown to train the model.
- 1) Run analysis_script.ipynb
+ 1) Run analysis_script.ipynb on jupyter notebook or jupyter lab
+ Alternatively:
+ 1) Run test.py
  
  # Training dataset used to generate the pre-trained model:
  Training data from the JSRT Chest X-ray dataset (not included) by Shiraishi et al. (https://doi.org/10.2214/ajr.174.1.1740071) and the bone-suppressed version by Juhász et al. (https://doi.org/10.1007/978-3-642-13039-7_90).  The dataset can be downloaded from https://www.kaggle.com/hmchuong/xray-bone-shadow-supression.
