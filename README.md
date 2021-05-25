@@ -8,9 +8,11 @@
  GPU code is NOT tested.
  
  1) Input your desired dataset into datasets.py
- Then, either:
+
+Then, either:
  2) Run analysis_script.ipynb on jupyter notebook or jupyter lab
- Or:
+
+Or:
  2) Modify produce_suppressed_images to get your desired settings & paths
  3) Run produce_suppressed_images.py in python console.
  
