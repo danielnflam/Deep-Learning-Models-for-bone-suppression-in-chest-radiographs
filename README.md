@@ -5,7 +5,7 @@
  
  # How to run the software using the pre-trained model:
  The pre-trained model is in the root directory, called "trained_network.tar".  This tar file is a dictionary containing the model state-dict, optimiser state-dict, and scheduler state-dict, the number of epochs completed and the number of real image-pairs shown to train the model.
- You will need to add relevant code to shunt your tensors + the network into GPU.
+ GPU code is NOT tested.
  
  1) Input your desired dataset into datasets.py
  Then, either:

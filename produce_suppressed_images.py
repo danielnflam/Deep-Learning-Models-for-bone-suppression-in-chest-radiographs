@@ -53,7 +53,16 @@ else:
 print(len(ds))
 dl = DataLoader(ds, _batch_size, shuffle=True, num_workers=0)
 
-# Network
+## Code for putting things on the GPU
+ngpu = 1 #torch.cuda.device_count()
+os.environ["CUDA_VISIBLE_DEVICES"] = "0"
+device = torch.device("cuda" if (torch.cuda.is_available() and ngpu > 0) else "cpu")
+print(device)
+if (torch.cuda.is_available()):
+    print(torch.cuda.get_device_name(torch.cuda.current_device()))
+    
+
+## Network
 input_array_size = (_batch_size, 1, image_spatial_size[0], image_spatial_size[1])
 net = GusarevModel.MultilayerCNN(input_array_size)
 #net = nn.DataParallel(net, list(range(ngpu)))
@@ -69,15 +78,20 @@ else:
     print("=> NO CHECKPOINT FOUND AT '{}'" .format(PATH_SAVE_NETWORK_INTERMEDIATE))
     raise RuntimeError("No checkpoint found at specified path.")
 
+net = net.to(device)
 # Set to testing mode
 net.eval()
 
+## SAVE THE BONE SUPPRESSED IMAGES AS PNGs
 path_to_save_images = Path(os.path.join("bone_suppressed",switch))
 path_to_save_images.mkdir(parents=True, exist_ok=True)
+iters=0
 for ii, data in enumerate(dl):
-    out = net(data[key_source])
+    input_data = data[key_source].to(device)
+    out = net(input_data)
     print(out.shape)
     print("Batch Number:" + str(ii))
+    out = out.cpu()
     for image in out:
         savename = str(iters)+".png"
         vutils.save_image( image, os.path.join(path_to_save_images, savename))
