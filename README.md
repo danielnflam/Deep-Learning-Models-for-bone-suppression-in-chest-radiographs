@@ -1,10 +1,11 @@
 # Deep Learning Models for bone suppression in chest radiographs
  Gusarev's bone suppression method, as described in https://doi.org/10.1109/CIBCB.2017.8058543.
  
- The software here has been implemented in Python 3.6 and PyTorch.
+ The software here has been implemented in Python 3.6 and PyTorch.  A batch normalisation layer was added in the convolutional blocks order to improve image quality and reduce artefacts.
+Hence, convolutional blocks now look like: conv->batchnorm->relu
  
  # How to run the software using the pre-trained model for evaluation and/or testing:
- The pre-trained model is in the root directory, called "trained_network.tar". It is takes in 256x256 images.
+ The pre-trained model is in the root directory, called "trained_network.tar". It is takes in 440x440 images.
  This tar file is a dictionary containing the model state-dict, optimiser state-dict, and scheduler state-dict, the number of epochs completed and the number of real image-pairs shown to train the model.
  For the analysis script, GPU code is NOT tested.
  
