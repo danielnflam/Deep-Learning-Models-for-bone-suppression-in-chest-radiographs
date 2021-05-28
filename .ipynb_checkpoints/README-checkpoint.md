@@ -3,14 +3,17 @@
  
  The software here has been implemented in Python 3.6 and PyTorch.
  
- # How to run the software using the pre-trained model:
- The pre-trained model is in the root directory, called "trained_network.tar".  This tar file is a dictionary containing the model state-dict, optimiser state-dict, and scheduler state-dict, the number of epochs completed and the number of real image-pairs shown to train the model.
- GPU code is NOT tested.
+ # How to run the software using the pre-trained model for evaluation and/or testing:
+ The pre-trained model is in the root directory, called "trained_network.tar". It is takes in 256x256 images.
+ This tar file is a dictionary containing the model state-dict, optimiser state-dict, and scheduler state-dict, the number of epochs completed and the number of real image-pairs shown to train the model.
+ For the analysis script, GPU code is NOT tested.
  
  1) Input your desired dataset into datasets.py
- Then, either:
+
+Then, either:
  2) Run analysis_script.ipynb on jupyter notebook or jupyter lab
- Or:
+
+Or:
  2) Modify produce_suppressed_images to get your desired settings & paths
  3) Run produce_suppressed_images.py in python console.
  
