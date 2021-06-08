@@ -1,7 +1,7 @@
 import torch
 import pandas as pd
 import numpy as np
-from skimage import io, transform
+from skimage import io, transform 
 from torch.utils.data import Dataset, DataLoader
 from torchvision import transforms
 import os, sys, time, datetime
@@ -11,6 +11,8 @@ import skimage.exposure
 File contains transformations as callable classes.
 
 """
+
+
 
 class ToTensor(object):
     """
@@ -28,9 +30,25 @@ class ToTensor(object):
         """
         for key_idx in self.sample_keys_images:
             image = sample[key_idx]
-            image = image.astype(np.float32)
-            sample[key_idx] = torch.from_numpy(image[np.newaxis,:])
-            
+            output = self.execute(image)
+            sample[key_idx] = output
+        return sample
+    def execute(self, image):
+        image = image.astype(np.float32)
+        if image.ndim==2:
+            output = torch.from_numpy(image[np.newaxis,:])
+        elif image.ndim==3:
+            output = torch.from_numpy(image)
+        return output
+    
+class HistogramEqualisation(object):
+    def __init__(self, sample_keys_images):
+        self.sample_keys_images = sample_keys_images
+    def __call__(self, sample):
+        for key_idx in self.sample_keys_images:
+            image = sample[key_idx]
+            image = skimage.exposure.equalize_hist(image)
+            sample[key_idx] = image
         return sample
 
 class CLAHE(object):
@@ -50,9 +68,12 @@ class ZScoreNormalisation(object):
     def __call__(self, sample):
         for key_idx in self.sample_keys_images:
             image = sample[key_idx]
-            image = (image - np.mean(image))/np.std(image)
+            image = self.execute(image)
             sample[key_idx] = image
         return sample
+    def execute(self, image):
+        image = (image - np.mean(image))/np.std(image)
+        return image
 
 class NormaliseBetweenPlusMinus1(object):
     def __init__(self, sample_keys_images):
@@ -60,12 +81,15 @@ class NormaliseBetweenPlusMinus1(object):
     def __call__(self, sample):
         for key_idx in self.sample_keys_images:
             image = sample[key_idx]
-            # Rescale to between 0 and 1
-            image = (image - np.amin(image)) / (np.amax(image) - np.amin(image))
-            # Rescale to between -1 and 1
-            image = (image*2 - 1)
-            sample[key_idx] = image
+            new_image = self.execute(image)
+            sample[key_idx] = new_image
         return sample
+    def execute(self, image):
+        # Rescale to between 0 and 1
+        new_image = (image - np.amin(image)) / (np.amax(image) - np.amin(image))
+        # Rescale to between -1 and 1
+        new_image = (new_image*2 - 1)
+        return new_image
 
 class RandomIntensityComplement(object):
     # Black becomes white and white becomes black
@@ -200,10 +224,13 @@ class RescalingNormalisation(object):
         """
         for key_idx in self.sample_keys_images:
             image = sample[key_idx]
-            scaled_image = (image - np.amin(image))/(np.amax(image) - np.amin(image)) # range[0,1]
-            output = scaled_image*(max(self.rescale_range) - min(self.rescale_range)) + min(self.rescale_range) # range[min(self.rescale_range), max(self.rescale_range)]
+            output = self.execute(image)
             sample[key_idx] = output
         return sample
+    def execute(self, image):
+        scaled_image = (image - np.amin(image))/(np.amax(image) - np.amin(image)) # range[0,1]
+        output = scaled_image*(max(self.rescale_range) - min(self.rescale_range)) + min(self.rescale_range) # range[min(self.rescale_range), max(self.rescale_range)]
+        return output
         
 class ImageComplement(object):
     """
@@ -217,16 +244,19 @@ class ImageComplement(object):
         """
         for key_idx in self.sample_keys_images:
             image = sample[key_idx]
-            max_image = np.amax(image)
-            min_image = np.amin(image)
-            # Rescale image to [0,1]
-            image = (image - min_image)/(max_image - min_image)
-            # Flip image
-            flipped_image = 1 - image
-            # Restore previous scale
-            flipped_image = flipped_image*(max_image - min_image) + min_image
+            flipped_image = self.execute(image)
             sample[key_idx] = flipped_image
         return sample
+    def execute(self, image):
+        max_image = np.amax(image)
+        min_image = np.amin(image)
+        # Rescale image to [0,1]
+        image = (image - min_image)/(max_image - min_image)
+        # Flip image
+        flipped_image = 1 - image
+        # Restore previous scale
+        flipped_image = flipped_image*(max_image - min_image) + min_image
+        return flipped_image
     
 class Random180(object):
     """
