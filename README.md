@@ -7,11 +7,11 @@ Hence, convolutional blocks now look like: conv->batchnorm->relu
  # How to run the software using the pre-trained model for evaluation and/or testing:
  The pre-trained model is in the root directory, called "trained_network.tar". It is trained on 256x256 PNG images.
  This tar file is a dictionary containing the model state-dict, optimiser state-dict, and scheduler state-dict, the number of epochs completed and the number of real image-pairs shown to train the model.
- For the analysis script, GPU code is NOT tested.
  
  1) Input your desired dataset into datasets.py
 
 Then:
+
  2) Run analysis_script.ipynb on jupyter notebook or jupyter lab
 
 
