@@ -5,7 +5,7 @@ import numpy as np
 from torch.utils.data import Dataset, DataLoader
 from torchvision import transforms
 import torchvision.transforms.functional as TF
-import os, sys, time, datetime
+import os, sys, time, datetime, math
 import skimage.exposure
 from PIL import Image, ImageOps
 
@@ -68,7 +68,7 @@ class Resize(object):
     Input integer decides the number of column pixels.    
     To keep the aspect ratio the same, use an integer as the input when initialising this object.
     """
-    def __init__(self, sample_keys_images, output_size):
+    def __init__(self, sample_keys_images, output_size, interp_mode=TF.InterpolationMode.BILINEAR):
         """
         Inputs:
             output_size (tuple or int): Desired output size. If tuple, output is
@@ -79,7 +79,7 @@ class Resize(object):
         assert isinstance(output_size, (int, tuple))
         self.output_size = output_size
         self.sample_keys_images = sample_keys_images
-        self.tform = transforms.Resize(self.output_size)
+        self.tform = transforms.Resize(self.output_size, interp_mode)
     def __call__(self, sample):
         """
         Inputs:
@@ -205,36 +205,42 @@ class ImageComplement(object):
         return sample
     
 class StandardiseMonochrome(object):
-    def __init__(self, sample_keys_images, standard="MONOCHROME1"):
+    def __init__(self, sample_keys_images, standard="MONOCHROME1", verbose=False):
         """standard should either be: MONOCHROME1 or MONOCHROME2"""
         self.sample_keys_images = sample_keys_images
         self.standard = standard
-        
+        self.verbose = verbose
     def tform(self, image):
         # Assumes image is [C x H x W] tensor
         height = image.shape[-2]
         width = image.shape[-1]
         min_intensity = torch.min(image)
         max_intensity = torch.max(image)
-        lowest10percent = round(height*0.9)
+        lowest25Percent = round(height*0.75)
         width_25percent = (round(width*0.25), round(width*0.75))
-        print("Intensity min:{}, max:{}".format(min_intensity, max_intensity))
+        
         average_intensity_threshold = (max_intensity - min_intensity)/2 + min_intensity
         test = image.detach()
         # find diagraphm area
-        average_lowest10percent_intensity = torch.mean(test[ :, lowest10percent:height, min(width_25percent):max(width_25percent)])
-        print("Threshold: {}, average_lowest_10%:{}".format(average_intensity_threshold,average_lowest10percent_intensity))
+        
+        average_lowest25Percent_intensity = torch.mean(test[ :, lowest25Percent:height, min(width_25percent):max(width_25percent)])
+        if math.isnan(average_lowest25Percent_intensity):
+            raise RuntimeError("average_lowest25Percent_intensity is NaN")
+        if self.verbose:
+            print(test.shape)
+            print("Intensity min:{}, max:{}".format(min_intensity, max_intensity))
+            print("Threshold: {}, average_lowest_25%:{}".format(average_intensity_threshold,average_lowest25Percent_intensity))
         if self.standard == "MONOCHROME1":
             # bright at 0, dark at 1
             # i.e. bone should be bright -- hence lowest10% should be bright
-            if average_lowest10percent_intensity < average_intensity_threshold:
+            if average_lowest25Percent_intensity < average_intensity_threshold:
                 image = self.intensityComplement(image)
                 has_switched=True
             else:
                 has_switched=False
         elif self.standard == "MONOCHROME2":
             # i.e. dark bone
-            if average_lowest10percent_intensity > average_intensity_threshold:
+            if average_lowest25Percent_intensity > average_intensity_threshold:
                 image = self.intensityComplement(image)
                 has_switched=True
             else:
