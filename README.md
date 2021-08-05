@@ -12,6 +12,7 @@ Hence, convolutional blocks now look like: conv->batchnorm->relu
  1) Input your desired dataset into datasets.py
 
 Then:
+
  2) Run analysis_script.ipynb on jupyter notebook or jupyter lab
 
 
