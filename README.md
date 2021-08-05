@@ -13,7 +13,8 @@ Hence, convolutional blocks now look like: conv->batchnorm->relu
 
 Then:
  2) Run analysis_script.ipynb on jupyter notebook or jupyter lab
- 3) 
+
+
  
  # Training dataset used to generate the pre-trained model:
  Training data from the JSRT Chest X-ray dataset (not included) by Shiraishi et al. (https://doi.org/10.2214/ajr.174.1.1740071) and the bone-suppressed version by Juhász et al. (https://doi.org/10.1007/978-3-642-13039-7_90).  The dataset can be downloaded from https://www.kaggle.com/hmchuong/xray-bone-shadow-supression.
